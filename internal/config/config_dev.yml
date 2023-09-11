@@ -1,0 +1,14 @@
+APP_NAME: chatroom
+APP_PORT: 8080
+LOG_LEVEL: "info"
+DB_MAX_IDLE_CONNS: 10
+DB_MAX_OPEN_CONNS: 0
+DB_MAX_LIFE_TIME: 1m
+DB_MAX_IDLE_TIME: 10m
+DB_HOST: localhost
+DB_PORT: 5432
+DB_NAME: chatroom
+DB_USER: user
+DB_PASSWORD: password
+DB_SSL_MODE: disable
+JWT_KEY: "secret"
