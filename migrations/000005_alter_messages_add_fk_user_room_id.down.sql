@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE IF EXISTS public.messages DROP CONSTRAINT user_room_id;
+
+COMMIT;

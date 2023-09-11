@@ -1,0 +1,7 @@
+BEGIN;
+
+ALTER TABLE IF EXISTS public.users_rooms DROP CONSTRAINT room_id;
+
+ALTER TABLE IF EXISTS public.users_rooms DROP CONSTRAINT user_id;
+
+COMMIT;
