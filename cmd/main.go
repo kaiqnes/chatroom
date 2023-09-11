@@ -30,13 +30,13 @@ func main() {
 	}
 
 	// Initialize server
-	srv, err := server.New(cfg)
+	engine, err := server.New(cfg)
 	if err != nil {
 		log.Fatalf("Error initializing server: %s", err.Error())
 	}
 
 	// Inject dependencies
-	dependencies, err := di.New(cfg, database, customLogger)
+	dependencies, err := di.New(cfg, database, engine, customLogger)
 	if err != nil {
 		log.Fatalf("Error initializing dependencies: %s", err.Error())
 	}
@@ -47,7 +47,7 @@ func main() {
 	}
 
 	// Start server
-	err = srv.Run(":" + cfg.Port)
+	err = engine.Run(":" + cfg.Port)
 	if err != nil {
 		log.Fatalf("Error running server: %s", err.Error())
 	}
