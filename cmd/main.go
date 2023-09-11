@@ -24,7 +24,7 @@ func main() {
 	}
 
 	// Initialize database
-	database, err := db.New(cfg)
+	database, err := db.New(cfg, &customLogger)
 	if err != nil {
 		log.Fatalf("Error initializing database: %s", err.Error())
 	}
