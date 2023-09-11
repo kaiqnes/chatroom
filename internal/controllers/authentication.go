@@ -55,7 +55,7 @@ func (c *authController) SignIn(ctx *gin.Context) {
 
 	expirationTime := time.Now().Add(5 * time.Minute)
 
-	err = c.authMiddleware.SetToken(ctx, creds.Username, expirationTime)
+	token, err := c.authMiddleware.SetToken(ctx, creds.Username, expirationTime)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"err": err.Error(),
@@ -64,7 +64,7 @@ func (c *authController) SignIn(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"response": "signed in",
+		"token": token,
 	})
 }
 

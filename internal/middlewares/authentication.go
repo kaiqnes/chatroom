@@ -22,7 +22,7 @@ type authenticationMiddleware struct {
 }
 
 type AuthenticationMiddleware interface {
-	SetToken(ctx *gin.Context, username string, expirationTime time.Time) error
+	SetToken(ctx *gin.Context, username string, expirationTime time.Time) (string, error)
 	ValidateToken() gin.HandlerFunc
 }
 
@@ -30,7 +30,7 @@ func NewAuthenticationMiddleware(log logger.CustomLogger) AuthenticationMiddlewa
 	return &authenticationMiddleware{log: log}
 }
 
-func (m *authenticationMiddleware) SetToken(ctx *gin.Context, username string, expirationTime time.Time) error {
+func (m *authenticationMiddleware) SetToken(ctx *gin.Context, username string, expirationTime time.Time) (string, error) {
 	claim := &claims{
 		Username: username,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -41,11 +41,11 @@ func (m *authenticationMiddleware) SetToken(ctx *gin.Context, username string, e
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	tokenString, err := token.SignedString([]byte(m.cfg.JwtKey))
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	ctx.SetCookie("token", tokenString, expirationTime.Second(), "/", "localhost", false, true)
-	return nil
+	return ctx.GetHeader("Cookie"), nil
 }
 
 func (m *authenticationMiddleware) ValidateToken() gin.HandlerFunc {
