@@ -14,6 +14,7 @@ dev:
   DB_NAME: chatroom-dev
   DB_USER: user
   DB_PASSWORD: password
+  JWT_KEY: "secret"
 
 stg:
   <<: *default
@@ -22,6 +23,7 @@ stg:
   DB_NAME: chatroom-stg
   DB_USER: DB_USER_STG
   DB_PASSWORD: DB_PASS_STG
+  JWT_KEY: "secret-stg"
 
 prd:
   <<: *default
@@ -30,3 +32,4 @@ prd:
   DB_NAME: chatroom-prd
   DB_USER: DB_USER_PRD
   DB_PASSWORD: DB_PASS_PRD
+  JWT_KEY: "secret-prd"

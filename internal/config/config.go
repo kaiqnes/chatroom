@@ -7,6 +7,7 @@ type Config struct {
 	AppName  string
 	LogLevel string
 	Port     string
+	JwtKey   string
 	Database Database
 }
 
@@ -27,5 +28,8 @@ const defaultConfigPath = "./internal/config/config.yml"
 func Load() (*Config, error) {
 	// Read environment variables
 	// Read config file
-	return &Config{}, nil
+	return &Config{
+		Port:   "8080",
+		JwtKey: "my_secret_key",
+	}, nil
 }
