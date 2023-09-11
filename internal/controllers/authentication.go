@@ -48,7 +48,7 @@ func (c *authController) SignIn(ctx *gin.Context) {
 
 	if !ok || expectedPassword != creds.Password {
 		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"err": err.Error(),
+			"err": "invalid credentials",
 		})
 		return
 	}
