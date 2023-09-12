@@ -19,6 +19,20 @@ func NewChatRepository(db *db.Database, log *logger.CustomLogger) domain.ChatRep
 	}
 }
 
+func (r *chatRepository) IsUserInRoom(userID, roomID string) error {
+	var userRoom domain.UserRoom
+	tx := r.db.DBInstance.Where("user_id = ? AND room_id = ? AND left_at IS NULL", userID, roomID).First(&userRoom)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	if userRoom.ID == "" {
+		return domain.ErrUserNotInRoom
+	}
+
+	return nil
+}
+
 func (r *chatRepository) SendMessage(userID, roomID, content string) error {
 	var userRoom domain.UserRoom
 	tx := r.db.DBInstance.Where("user_id = ? AND room_id = ? AND left_at IS NULL", userID, roomID).First(&userRoom)
@@ -49,7 +63,7 @@ func (r *chatRepository) ListActiveRooms() ([]domain.Room, error) {
 	return rooms, nil
 }
 
-func (r *chatRepository) ListRoomDetailsByRoomID(roomID string) (domain.RoomDetails, error) {
+func (r *chatRepository) ListRoomDetailsByRoomID(roomID string) (*domain.RoomDetails, error) {
 	var roomDetails []domain.RoomDetailsDB
 	tx := r.db.DBInstance.Table("rooms r").
 		Select(`r.id as room_id, r.name as room_name, r.description as room_description, 
@@ -63,7 +77,7 @@ m.id as message_id, m.body as message_content, m.created_at as message_created_a
 		Limit(50).
 		Scan(&roomDetails)
 	if tx.Error != nil {
-		return domain.RoomDetails{}, tx.Error
+		return nil, tx.Error
 	}
 
 	var results domain.RoomDetails
@@ -95,7 +109,7 @@ m.id as message_id, m.body as message_content, m.created_at as message_created_a
 		}
 	}
 
-	return results, nil
+	return &results, nil
 }
 
 func (r *chatRepository) JoinRoom(userID string, roomID string) error {

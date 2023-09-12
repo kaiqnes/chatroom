@@ -27,6 +27,15 @@ func (r *userRepository) GetUserByUsername(username string) (*domain.User, error
 	return &user, nil
 }
 
+func (r *userRepository) GetUserByID(userID string) (*domain.User, error) {
+	var user domain.User
+	tx := r.db.DBInstance.Where("id = ?", userID).First(&user)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return &user, nil
+}
+
 func (r *userRepository) SaveUser(user *domain.User) error {
 	tx := r.db.DBInstance.Select("username", "password", "email").Create(&user)
 	if tx.Error != nil {

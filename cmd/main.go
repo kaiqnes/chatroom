@@ -36,7 +36,7 @@ func main() {
 	}
 
 	// Inject dependencies
-	dependencies, err := di.New(cfg, database, engine, customLogger)
+	dependencies, err := di.New(cfg, database, engine, &customLogger)
 	if err != nil {
 		log.Fatalf("Error initializing dependencies: %s", err.Error())
 	}
