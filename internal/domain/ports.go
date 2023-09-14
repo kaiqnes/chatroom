@@ -19,6 +19,8 @@ type UserRepository interface {
 
 type SendMessageUseCase interface {
 	SendMessage(username, roomID, content string) error
+	SendToBotMessage(roomID, content string) error
+	SendFromBotMessage(roomID, content string) error
 }
 
 type AuthUseCase interface {
