@@ -12,3 +12,4 @@ DB_USER: ${DB_USER}
 DB_PASSWORD: ${DB_PASS}
 DB_SSL_MODE: ${DB_SSL_MODE}
 JWT_KEY: ${JWT_KEY}
+STOCK_BOT_TEMPLATE_URL: "https://stooq.com/q/l/?s=%s&f=sd2t2ohlcv&h&e=csv"

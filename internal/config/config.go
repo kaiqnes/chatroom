@@ -24,6 +24,7 @@ type Config struct {
 	DBMaxOpenConnections    int           `mapstructure:"db_max_open_conns"`
 	DBMaxConnectionLifetime time.Duration `mapstructure:"db_max_life_time"`
 	DBMaxIdleTime           time.Duration `mapstructure:"db_max_idle_time"`
+	StockBotTemplateURL     string        `mapstructure:"stock_bot_template_url"`
 }
 
 const defaultConfigPath = "./internal/config/"

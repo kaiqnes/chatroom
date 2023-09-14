@@ -2,9 +2,13 @@ package domain
 
 import (
 	"database/sql"
-	"github.com/golang-jwt/jwt/v5"
+	"fmt"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
+
+const StockRequestTemplate = `^\\/stock=(.)$`
 
 type Claims struct {
 	Username string `json:"username"`
@@ -78,4 +82,23 @@ type RoomDetails struct {
 	UsersRoomsID    string
 	Users           []UserRoomDetail
 	Messages        []MessageDetail
+}
+
+type StockBotRequest struct {
+	StockCode string
+}
+
+type StockBotResponse struct {
+	Symbol string `csv:"Symbol"`
+	Date   string `csv:"Date"`
+	Time   string `csv:"Time"`
+	Open   string `csv:"Open"`
+	High   string `csv:"High"`
+	Low    string `csv:"Low"`
+	Close  string `csv:"Close"`
+	Volume string `csv:"Volume"`
+}
+
+func (s *StockBotResponse) GetFormattedResponse() string {
+	return fmt.Sprintf("%s quote is $%s per share", s.Symbol, s.Close)
 }

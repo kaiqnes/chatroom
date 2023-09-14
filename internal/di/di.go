@@ -1,6 +1,7 @@
 package di
 
 import (
+	"chatroom/internal/clients"
 	"chatroom/internal/config"
 	"chatroom/internal/controllers"
 	"chatroom/internal/db"
@@ -39,6 +40,11 @@ func (d *DI) Inject() error {
 	// Inject Middlewares
 	authMiddleware := middlewares.NewAuthenticationMiddleware(d.cfg, d.log)
 
+	// ================================================================================================================
+	// Inject Clients
+	stockBotClient := clients.NewStockBot(d.cfg)
+
+	// ================================================================================================================
 	// Inject Repositories
 	chatRepository := repositories.NewChatRepository(d.database, d.log)
 	userRepository := repositories.NewUserRepository(d.database, d.log)

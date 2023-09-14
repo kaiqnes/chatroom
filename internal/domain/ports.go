@@ -25,3 +25,7 @@ type AuthUseCase interface {
 	SignIn(ctx context.Context, username, password string) (string, int, error)
 	SignUp(ctx context.Context, username, password string) error
 }
+
+type StockBotClient interface {
+	Call(req StockBotRequest) (*StockBotResponse, error)
+}
