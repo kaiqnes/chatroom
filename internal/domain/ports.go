@@ -1,5 +1,7 @@
 package domain
 
+import "context"
+
 type ChatRepository interface {
 	ListActiveRooms() ([]Room, error)
 	ListRoomDetailsByRoomID(roomID string) (*RoomDetails, error)
@@ -17,4 +19,9 @@ type UserRepository interface {
 
 type SendMessageUseCase interface {
 	SendMessage(username, roomID, content string) error
+}
+
+type AuthUseCase interface {
+	SignIn(ctx context.Context, username, password string) (string, int, error)
+	SignUp(ctx context.Context, username, password string) error
 }
