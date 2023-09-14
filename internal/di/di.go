@@ -66,7 +66,7 @@ func (d *DI) Inject() error {
 	// Inject Front-End Files
 	d.httpServer.LoadHTMLFiles(
 		"/Users/caiquenunes/Development/Courses/chatroom/pkg/front-end/auth/auth.html",
-		"/Users/caiquenunes/Development/Courses/chatroom/pkg/front-end/socket_test/chat_rooms.html")
+		"/Users/caiquenunes/Development/Courses/chatroom/pkg/front-end/chatroom/chat_rooms.html")
 
 	// Inject Front-End Routes
 	d.httpServer.GET("/sign", func(c *gin.Context) {

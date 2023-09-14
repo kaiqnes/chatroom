@@ -1,0 +1,155 @@
+<html>
+<head>
+  <title>Chat Site</title>
+  <style>
+    #rooms {
+      display: flex;
+      justify-content: center;
+      margin: 10px;
+    }
+    .room {
+      width: 100px;
+      height: 50px;
+      border: 1px solid black;
+      text-align: center;
+      line-height: 50px;
+      cursor: pointer;
+      background-color: white;
+    }
+    .active {
+      background-color: green;
+    }
+    #messages {
+      height: 300px;
+      overflow-y: scroll;
+      border: #1a1a1a 1px solid;
+      background-color: white;
+    }
+    .message {
+      margin: 10px;
+      padding: 10px;
+      border: 1px solid black;
+    }
+    .username {
+      font-weight: bold;
+    }
+    .timestamp {
+      font-style: italic;
+      color: gray;
+    }
+    body {
+      background: #76b852; /* fallback for old browsers */
+      background: rgb(141,194,111);
+      background: linear-gradient(90deg, rgba(141,194,111,1) 0%, rgba(118,184,82,1) 50%);
+      font-family: "Roboto", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+</head>
+<body>
+<h1>Welcome to Chat Site</h1>
+<div id="rooms">
+  <div id="room1" class="room active">Room 1</div>
+  <div id="room2" class="room">Room 2</div>
+</div>
+<div id="messages"></div>
+<form id="form">
+  <input id="input" type="text" placeholder="Type a message...">
+  <button id="button" type="submit">Send</button>
+</form>
+<script>
+  // Connect to the server using socket.io
+  const socket = io({auth: {token: window.localStorage.getItem("token")}});
+
+  // Get the elements from the document
+  const rooms = document.getElementById("rooms");
+  const room1 = document.getElementById("room1");
+  const room2 = document.getElementById("room2");
+  const messages = document.getElementById("messages");
+  const form = document.getElementById("form");
+  const input = document.getElementById("input");
+  const button = document.getElementById("button");
+
+  // Initialize the current room to "room1"
+  let currentRoom = "room1";
+  const roomIDs = {"room1": "82e78d3f-c66b-48a4-99ed-22894df09bc8", "room2": "e30029cf-3fa4-4f1e-82a2-db01c3bf30d8"}
+
+  // Listen for the click event of the rooms
+  rooms.addEventListener("click", function(event) {
+    // Get the target element of the event
+    const target = event.target;
+    // If the target is a room element
+    if (target.classList.contains("room")) {
+      // Get the id of the target element
+      const roomId = target.id;
+      // If the roomId is different from the current room
+      if (roomId !== currentRoom) {
+        // Remove the "active" class from the current room element
+        document.getElementById(currentRoom).classList.remove("active");
+        // Add the "active" class to the target element
+        target.classList.add("active");
+        // Set the current room to the roomId
+        currentRoom = roomId;
+        // Emit a "join room" event to the server with the roomId
+        socket.emit("join room", roomId);
+        // Clear the messages element
+        messages.innerHTML = "";
+      }
+    }
+  });
+
+  // Listen for the submit event of the form
+  form.addEventListener("submit", function(event) {
+    // Prevent the default behavior of the form
+    event.preventDefault();
+    // Get the value of the input
+    const message = input.value;
+    const username = localStorage.getItem("username")
+
+    // If the message is not empty
+    if (message) {
+      // Emit a "chat message" event to the server with the message and the current room
+      socket.emit("chat message", {message: message, username: username, room_id: roomIDs[currentRoom]});
+      // Clear the input
+      input.value = "";
+    }
+  });
+
+  // Listen for the "chat message" event from the server
+  socket.on("chat message", function(data) {
+    // Get the username, timestamp and message from the data object
+    console.log(data)
+    const username = data.username;
+    const timestamp = data.timestamp;
+    const formattedTimestamp = formatDatetime(timestamp)
+    const message = data.message;
+    // Create a new div element for the message
+    const div = document.createElement("div");
+    // Add the "message" class to the div element
+    div.classList.add("message");
+    // Set the inner HTML of the div element with the username, timestamp and message
+    div.innerHTML = "<span class='username'>" + username + "</span> <span class='timestamp'>" + timestamp + "</span><br>" + message;
+    // Append the div element to the messages element
+    messages.appendChild(div);
+    // Scroll to the bottom of the messages element
+    messages.scrollTop = messages.scrollHeight;
+  });
+
+function formatDatetime(dateString) {
+  const date = new Date(dateString)
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based in JavaScript
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  const timezone = date.getTimezoneOffset() / 60;
+
+  return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}-${timezone}`;
+}
+
+</script>
+</body>
+</html>
