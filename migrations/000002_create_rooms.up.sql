@@ -3,11 +3,10 @@ BEGIN;
 -- Create the rooms table
 CREATE TABLE IF NOT EXISTS public.rooms
 (
-    id             uuid PRIMARY KEY,
+    id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name           VARCHAR(100),
     description    VARCHAR(500),
-    created_at     TIMESTAMP NOT NULL DEFAULT NOW(),
-    deactivated_at TIMESTAMP
+    created_at     TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 -- Create indexes for the rooms table

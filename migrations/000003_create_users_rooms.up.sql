@@ -3,7 +3,7 @@ BEGIN;
 -- Create the users_rooms table
 CREATE TABLE IF NOT EXISTS public.users_rooms
 (
-    id        uuid PRIMARY KEY,
+    id        uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id   uuid      NOT NULL,
     room_id   uuid      NOT NULL,
     joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
