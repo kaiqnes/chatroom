@@ -30,13 +30,13 @@ func main() {
 	}
 
 	// Initialize server
-	engine, err := server.New(cfg)
+	httpServer, socketServer, err := server.New(cfg)
 	if err != nil {
 		log.Fatalf("Error initializing server: %s", err.Error())
 	}
 
 	// Inject dependencies
-	dependencies, err := di.New(cfg, database, engine, &customLogger)
+	dependencies, err := di.New(cfg, database, httpServer, socketServer, &customLogger)
 	if err != nil {
 		log.Fatalf("Error initializing dependencies: %s", err.Error())
 	}
@@ -46,8 +46,16 @@ func main() {
 		log.Fatalf("Error injecting dependencies: %s", err.Error())
 	}
 
-	// Start server
-	err = engine.Run(":" + cfg.Port)
+	// Start Socket Server
+	go func() {
+		if err := socketServer.Serve(); err != nil {
+			log.Fatalf("socketio listen error: %s\n", err)
+		}
+	}()
+	defer socketServer.Close()
+
+	// Start HTTP Server
+	err = httpServer.Run(":" + cfg.Port)
 	if err != nil {
 		log.Fatalf("Error running server: %s", err.Error())
 	}
