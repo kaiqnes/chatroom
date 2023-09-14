@@ -29,7 +29,7 @@ func (c *chatroomController) SetupEndpoints() {
 }
 
 func (c *chatroomController) OnMessage(socket socketio.Conn, req messageInputDto) {
-	//socket.SetContext(req)
+	socket.SetContext(req)
 
 	// Call use case
 	err := c.sendMessageUseCase.SendMessage(req.Username, req.RoomID, req.Message)
