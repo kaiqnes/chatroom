@@ -22,7 +22,7 @@ func NewStockBot(cfg *config.Config) domain.StockBotClient {
 func (c *stockBot) Call(req domain.StockBotRequest) (*domain.StockBotResponse, error) {
 	var response *domain.StockBotResponse
 
-	resp, err := http.Get(c.ParseURL(req.ParsedStockCode()))
+	resp, err := http.Get(c.ParseURL(req.StockCode))
 	if err != nil {
 		return nil, err
 	}
