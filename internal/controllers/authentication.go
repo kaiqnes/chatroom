@@ -1,29 +1,23 @@
 package controllers
 
 import (
-	"net/http"
-	"time"
-
 	"chatroom/internal/db"
+	"chatroom/internal/domain"
 	"chatroom/internal/logger"
-	"chatroom/internal/middlewares"
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-var users = map[string]string{
-	"user1": "password1",
-	"user2": "password2",
-}
-
 type authController struct {
-	routes         *gin.Engine
-	db             *db.Database
-	authMiddleware middlewares.AuthenticationMiddleware
-	log            logger.CustomLogger
+	routes  *gin.Engine
+	db      *db.Database
+	useCase domain.AuthUseCase
+	log     logger.CustomLogger
 }
 
-func NewAuthController(routes *gin.Engine, authMiddleware middlewares.AuthenticationMiddleware) Controller {
-	return &authController{routes: routes, authMiddleware: authMiddleware}
+func NewAuthController(routes *gin.Engine, authUseCase domain.AuthUseCase) Controller {
+	return &authController{routes: routes, useCase: authUseCase}
 }
 
 func (c *authController) SetupEndpoints() {
@@ -33,35 +27,35 @@ func (c *authController) SetupEndpoints() {
 }
 
 func (c *authController) SignIn(ctx *gin.Context) {
-	var creds signInputDto
-	err := ctx.BindJSON(&creds)
+	var req signInputDto
+	err := ctx.BindJSON(&req)
 	if err != nil {
-		// If the structure of the body is wrong, return an HTTP error
+		fmt.Printf("error binding json: %v\n", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"err": err.Error(),
 		})
 		return
 	}
 
-	// TODO: move it to be executed in DB
-	expectedPassword, ok := users[creds.Username]
-
-	if !ok || expectedPassword != creds.Password {
-		ctx.JSON(http.StatusUnauthorized, gin.H{
-			"err": "invalid credentials",
+	errs := c.validateRequest(req)
+	if len(errs) > 0 {
+		fmt.Printf("missing mandatory fields: %v\n", errs)
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"err": errs,
 		})
 		return
 	}
 
-	expirationTime := time.Now().Add(5 * time.Minute)
-
-	token, err := c.authMiddleware.SetToken(ctx, creds.Username, expirationTime)
+	token, expiration, err := c.useCase.SignIn(ctx, req.Username, req.Password)
 	if err != nil {
+		fmt.Printf("error signing in: %v\n", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"err": err.Error(),
 		})
 		return
 	}
+
+	ctx.SetCookie("token", token, expiration, "/", "localhost", false, true)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"token": token,
@@ -72,12 +66,38 @@ func (c *authController) SignUp(ctx *gin.Context) {
 	var creds signInputDto
 	err := ctx.BindJSON(&creds)
 	if err != nil {
+		fmt.Printf("error binding json: %v\n", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"err": err.Error(),
 		})
 		return
 	}
 
+	errs := c.validateRequest(creds)
+	if len(errs) > 0 {
+		fmt.Printf("missing mandatory fields: %v\n", errs)
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"err": errs,
+		})
+		return
+	}
+
+	err = c.useCase.SignUp(ctx, creds.Username, creds.Password)
+	if err != nil {
+		fmt.Printf("error signing up: %v\n", err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"err": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{
+		"response": "signed up",
+	})
+	return
+}
+
+func (c *authController) validateRequest(creds signInputDto) []string {
 	var errs []string
 	if len(creds.Username) == 0 {
 		errs = append(errs, "empty username")
@@ -85,28 +105,7 @@ func (c *authController) SignUp(ctx *gin.Context) {
 	if len(creds.Password) == 0 {
 		errs = append(errs, "empty password")
 	}
-	if len(errs) > 0 {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"err": errs,
-		})
-		return
-	}
-
-	// TODO: move it to be executed in DB
-	if _, ok := users[creds.Username]; ok {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"err": "username already exists",
-		})
-		return
-	}
-
-	// TODO: move it to be executed in DB
-	users[creds.Username] = creds.Password
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"response": "signed up",
-	})
-	return
+	return errs
 }
 
 func (c *authController) SignOut(ctx *gin.Context) {
