@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.IO Chat</title>
+  <style>
+    /* Add some style to the chat elements */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    #chat {
+      width: 80%;
+      margin: 0 auto;
+      max-width: 600px;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      overflow-y: scroll;
+      height: 300px;
+      border: 1px solid gray;
+    }
+
+    #messages li {
+      padding: 5px 10px;
+    }
+
+    #messages li:nth-child(odd) {
+      background: #eee;
+    }
+
+    #form {
+      display: flex;
+      margin-top: 10px;
+    }
+
+    #input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid gray;
+    }
+
+    #button {
+      width: 100px;
+      background: blue;
+      color: white;
+      border: none;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+<div id="chat">
+  <h1>Socket.IO Chat</h1>
+  <ul id="messages"></ul>
+  <form id="form" action="">
+    <input id="input" autocomplete="off" placeholder="Type a message..." />
+    <button id="button">Send</button>
+  </form>
+</div>
+<!-- Load Socket.IO and add some client-side logic -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+<script>
+  // Connect to the server
+  const socket = io();
+
+  // Get the elements from the document
+  const form = document.getElementById('form');
+  const input = document.getElementById('input');
+  const messages = document.getElementById('messages');
+
+  // Listen for the submit event of the form
+  form.addEventListener('submit', function(e) {
+    // Prevent the default behavior of the form
+    e.preventDefault();
+    // If the input is not empty
+    if (input.value) {
+      // Emit a chat message event to the server with the input value
+      socket.emit('request', input.value);
+      console.log('send to back-end', input.value);
+      // Clear the input field
+      input.value = '';
+    }
+  });
+
+  // Listen for the chat message event from the server
+  socket.on('reply', function(msg) {
+    // Create a new list item with the message text
+    const li = document.createElement('li');
+    li.textContent = msg;
+    // Append the list item to the messages list
+    messages.appendChild(li);
+    // Scroll to the bottom of the messages list
+    messages.scrollTop = messages.scrollHeight;
+  });
+</script>
+</body>
+</html>

@@ -1,10 +1,6 @@
 package di
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-
 	"chatroom/internal/config"
 	"chatroom/internal/controllers"
 	"chatroom/internal/db"
@@ -12,8 +8,12 @@ import (
 	"chatroom/internal/middlewares"
 	"chatroom/internal/repositories"
 	"chatroom/internal/use_cases"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	socketio "github.com/googollee/go-socket.io"
+	"log"
+	"net/http"
+	"os"
 )
 
 type DI struct {
@@ -63,10 +63,12 @@ func (d *DI) Inject() error {
 	d.httpServer.GET("/socket.io/*any", gin.WrapH(d.socketServer))
 	d.httpServer.POST("/socket.io/*any", gin.WrapH(d.socketServer))
 
+	dir, _ := os.Getwd()
+
 	// Inject Front-End Files
 	d.httpServer.LoadHTMLFiles(
-		"/Users/caiquenunes/Development/Courses/chatroom/pkg/front-end/auth/auth.html",
-		"/Users/caiquenunes/Development/Courses/chatroom/pkg/front-end/chatroom/chat_rooms.html")
+		dir+"/pkg/front-end/auth/auth.html",
+		dir+"/pkg/front-end/chatroom/chat_rooms.html")
 
 	// Inject Front-End Routes
 	d.httpServer.GET("/sign", func(c *gin.Context) {

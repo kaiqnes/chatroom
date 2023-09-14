@@ -1,10 +1,3 @@
-# SHELL=/bin/bash
-# .ONESHELL:
-# .DEFAULT_GOAL := all
-
-SERVER_SOURCES:=./cmd
-SERVER_TARGET:=./chatroom
-
 .ONESHELL:
 .PHONY: install-tools
 install-tools: install-asdf-tools install-go-tools asdf-reshim
@@ -35,17 +28,9 @@ format:
 	goimports -w -l .
 	golangci-lint run --fix
 
-.PHONY: check-formatting
-check-formatting:
-	test -z "$(shell goimports -l .)"
-
 .PHONY: lint
 lint:
 	golangci-lint run -v ./...
-
-.PHONY: run-db-local
-run-db-local: stop-local
-	sleep 5 && docker-compose up -d
 
 .PHONY: stop-local
 stop-local:
@@ -53,23 +38,13 @@ stop-local:
 
 .PHONY: server-build
 server-build:
-	go build \
-	-ldflags \
-    $(LD_FLAGS) \
-	-o "$(SERVER_TARGET)" $(SERVER_SOURCES)
+	go build ./cmd/main.go
 
 .PHONY: run-local
-run-local: run-db-local server-build
-	ENV=dev $(SERVER_TARGET)
-
-.PHONY: migrate-up
-migrate-up:
-	./scripts/migrate.sh $(ENV) up
+run-local:
+	docker-compose up
 
 .PHONY: migrate-create
 migrate-create:
 	./scripts/migrate-create.sh $(name)
 
-.PHONY: migrate-down
-migrate-down:
-	./scripts/migrate.sh $(ENV) down
