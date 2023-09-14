@@ -40,11 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error initializing dependencies: %s", err.Error())
 	}
-
-	err = dependencies.Inject()
-	if err != nil {
-		log.Fatalf("Error injecting dependencies: %s", err.Error())
-	}
+	dependencies.Inject()
 
 	// Start Socket Server
 	go func() {
