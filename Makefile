@@ -47,12 +47,15 @@ lint:
 run-db-local: stop-local
 	sleep 5 && docker-compose up -d
 
+.PHONY: stop-local
+stop-local:
+	docker-compose down
+
 .PHONY: server-build
 server-build:
 	go build \
 	-ldflags \
     $(LD_FLAGS) \
-    -mod=readonly -v \
 	-o "$(SERVER_TARGET)" $(SERVER_SOURCES)
 
 .PHONY: run-local
