@@ -19,13 +19,13 @@ func NewSendMessageUseCase(chatRepository domain.ChatRepository, userRepository 
 	}
 }
 
-func (u *sendMessageUseCase) SendMessage(userID, roomID, content string) error {
-	err := u.chatRepository.IsUserInRoom(userID, roomID)
+func (u *sendMessageUseCase) SendMessage(username, roomID, content string) error {
+	user, err := u.userRepository.GetUserByUsername(username)
 	if err != nil {
 		return err
 	}
 
-	err = u.chatRepository.SendMessage(userID, roomID, content)
+	err = u.chatRepository.SendMessage(user.ID, roomID, content)
 	if err != nil {
 		return err
 	}

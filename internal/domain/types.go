@@ -2,14 +2,20 @@ package domain
 
 import (
 	"database/sql"
+	"github.com/golang-jwt/jwt/v5"
 	"time"
 )
+
+type Claims struct {
+	Username string `json:"username"`
+	UserID   string `json:"user_id"`
+	jwt.RegisteredClaims
+}
 
 type User struct {
 	ID        string `gorm:"default:uuid_generate_v3()"`
 	Username  string
 	Password  string
-	Email     string
 	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP()"`
 }
 
@@ -25,7 +31,6 @@ type UserRoom struct {
 	UserID   string
 	RoomID   string
 	JoinedAt time.Time `gorm:"default:CURRENT_TIMESTAMP()"`
-	LeftAt   *time.Time
 }
 
 func (UserRoom) TableName() string {
@@ -33,10 +38,11 @@ func (UserRoom) TableName() string {
 }
 
 type Message struct {
-	ID         string `gorm:"default:uuid_generate_v3()"`
-	UserRoomID string
-	Body       string
-	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP()"`
+	ID        string `gorm:"default:uuid_generate_v3()"`
+	UserID    string
+	RoomID    string
+	Body      string
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP()"`
 }
 
 type UserRoomDetail struct {

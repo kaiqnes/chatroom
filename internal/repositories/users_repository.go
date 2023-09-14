@@ -37,7 +37,7 @@ func (r *userRepository) GetUserByID(userID string) (*domain.User, error) {
 }
 
 func (r *userRepository) SaveUser(user *domain.User) error {
-	tx := r.db.DBInstance.Select("username", "password", "email").Create(&user)
+	tx := r.db.DBInstance.Select("username", "password").Create(&user)
 	if tx.Error != nil {
 		return tx.Error
 	}

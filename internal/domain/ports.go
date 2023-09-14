@@ -16,5 +16,5 @@ type UserRepository interface {
 }
 
 type SendMessageUseCase interface {
-	SendMessage(userID, roomID, content string) error
+	SendMessage(username, roomID, content string) error
 }

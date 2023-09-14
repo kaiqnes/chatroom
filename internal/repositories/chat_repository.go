@@ -1,10 +1,11 @@
 package repositories
 
 import (
+	"time"
+
 	"chatroom/internal/db"
 	"chatroom/internal/domain"
 	"chatroom/internal/logger"
-	"time"
 )
 
 type chatRepository struct {
@@ -34,19 +35,10 @@ func (r *chatRepository) IsUserInRoom(userID, roomID string) error {
 }
 
 func (r *chatRepository) SendMessage(userID, roomID, content string) error {
-	var userRoom domain.UserRoom
-	tx := r.db.DBInstance.Where("user_id = ? AND room_id = ? AND left_at IS NULL", userID, roomID).First(&userRoom)
-	if tx.Error != nil {
-		return tx.Error
-	}
-
-	if userRoom.ID == "" {
-		return domain.ErrUserNotInRoom
-	}
-
-	tx = r.db.DBInstance.Create(&domain.Message{
-		UserRoomID: userRoom.ID,
-		Body:       content,
+	tx := r.db.DBInstance.Create(&domain.Message{
+		UserID: userID,
+		RoomID: roomID,
+		Body:   content,
 	})
 	if tx.Error != nil {
 		return tx.Error
