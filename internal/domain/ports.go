@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	socketio "github.com/googollee/go-socket.io"
 
 	"github.com/gin-gonic/gin"
 )
@@ -41,8 +42,22 @@ type MessageQueue interface {
 	Listen() error
 }
 
-type Controller interface {
+type AuthController interface {
 	SetupEndpoints()
+	SignIn(ctx *gin.Context)
+	SignUp(ctx *gin.Context)
+}
+
+type ChatController interface {
+	SetupEndpoints()
+	SendMessageFromBot(req MessageRequestDto)
+	OnMessage(socket socketio.Conn, req MessageRequestDto)
+	ListMessages(ctx *gin.Context)
+}
+
+type HealthController interface {
+	SetupEndpoints()
+	HealthCheck(ctx *gin.Context)
 }
 
 type AuthenticationMiddleware interface {

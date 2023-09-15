@@ -19,7 +19,7 @@ type chatroomController struct {
 }
 
 func NewChatroomController(httpServer *gin.Engine, socketServer *socketio.Server,
-	authMiddleware domain.AuthenticationMiddleware, sendMessageUseCase domain.SendMessageUseCase) domain.Controller {
+	authMiddleware domain.AuthenticationMiddleware, sendMessageUseCase domain.SendMessageUseCase) domain.ChatController {
 	return &chatroomController{httpServer: httpServer, socketServer: socketServer,
 		authMiddleware: authMiddleware, sendMessageUseCase: sendMessageUseCase}
 }

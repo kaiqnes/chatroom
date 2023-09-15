@@ -13,7 +13,7 @@ type authController struct {
 	useCase domain.AuthUseCase
 }
 
-func NewAuthController(routes *gin.Engine, authUseCase domain.AuthUseCase) domain.Controller {
+func NewAuthController(routes *gin.Engine, authUseCase domain.AuthUseCase) domain.AuthController {
 	return &authController{routes: routes, useCase: authUseCase}
 }
 
