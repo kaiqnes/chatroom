@@ -3,18 +3,15 @@ package repositories
 import (
 	"chatroom/internal/db"
 	"chatroom/internal/domain"
-	"chatroom/internal/logger"
 )
 
 type userRepository struct {
-	db  *db.Database
-	log logger.CustomLogger
+	db *db.Database
 }
 
-func NewUserRepository(db *db.Database, log logger.CustomLogger) domain.UserRepository {
+func NewUserRepository(db *db.Database) domain.UserRepository {
 	return &userRepository{
-		db:  db,
-		log: log,
+		db: db,
 	}
 }
 

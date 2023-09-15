@@ -7,19 +7,17 @@ import (
 
 	"chatroom/internal/config"
 	"chatroom/internal/domain"
-	"chatroom/internal/logger"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 type authenticationMiddleware struct {
-	log logger.CustomLogger
 	cfg *config.Config
 }
 
-func NewAuthenticationMiddleware(cfg *config.Config, log logger.CustomLogger) domain.AuthenticationMiddleware {
-	return &authenticationMiddleware{cfg: cfg, log: log}
+func NewAuthenticationMiddleware(cfg *config.Config) domain.AuthenticationMiddleware {
+	return &authenticationMiddleware{cfg: cfg}
 }
 
 func (m *authenticationMiddleware) ValidateToken() gin.HandlerFunc {

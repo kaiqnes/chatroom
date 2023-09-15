@@ -2,7 +2,6 @@ package use_cases
 
 import (
 	"chatroom/internal/domain"
-	"chatroom/internal/logger"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -13,16 +12,14 @@ type sendMessageUseCase struct {
 	userRepository domain.UserRepository
 	botClient      domain.StockBotClient
 	mq             domain.MessageQueue
-	log            logger.CustomLogger
 }
 
 func NewSendMessageUseCase(chatRepository domain.ChatRepository, userRepository domain.UserRepository,
-	botClient domain.StockBotClient, log logger.CustomLogger) domain.SendMessageUseCase {
+	botClient domain.StockBotClient) domain.SendMessageUseCase {
 	return &sendMessageUseCase{
 		chatRepository: chatRepository,
 		userRepository: userRepository,
 		botClient:      botClient,
-		log:            log,
 	}
 }
 

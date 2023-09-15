@@ -2,7 +2,6 @@ package use_cases
 
 import (
 	"chatroom/internal/domain"
-	"chatroom/internal/logger"
 	"context"
 	"fmt"
 	"time"
@@ -14,14 +13,12 @@ import (
 type authUseCase struct {
 	jwtSecret      []byte
 	userRepository domain.UserRepository
-	log            logger.CustomLogger
 }
 
-func NewAuthUseCase(secret string, userRepository domain.UserRepository, log logger.CustomLogger) domain.AuthUseCase {
+func NewAuthUseCase(secret string, userRepository domain.UserRepository) domain.AuthUseCase {
 	return &authUseCase{
 		jwtSecret:      []byte(secret),
 		userRepository: userRepository,
-		log:            log,
 	}
 }
 

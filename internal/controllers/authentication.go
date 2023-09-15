@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"chatroom/internal/domain"
-	"chatroom/internal/logger"
 	"fmt"
 	"net/http"
 
@@ -12,7 +11,6 @@ import (
 type authController struct {
 	routes  *gin.Engine
 	useCase domain.AuthUseCase
-	log     logger.CustomLogger
 }
 
 func NewAuthController(routes *gin.Engine, authUseCase domain.AuthUseCase) domain.Controller {

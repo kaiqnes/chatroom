@@ -1,7 +1,6 @@
 package db
 
 import (
-	"chatroom/internal/logger"
 	"fmt"
 	"time"
 
@@ -15,7 +14,7 @@ type Database struct {
 	DBInstance *gorm.DB
 }
 
-func New(cfg *config.Config, log *logger.CustomLogger) (*Database, error) {
+func New(cfg *config.Config) (*Database, error) {
 	// Initialize database connection with GORM
 	fmt.Println("[db] Initializing database connection")
 	dsn := getDSN(cfg)

@@ -7,7 +7,6 @@ import (
 	"chatroom/internal/controllers"
 	"chatroom/internal/db"
 	"chatroom/internal/domain"
-	"chatroom/internal/logger"
 	"chatroom/internal/middlewares"
 	"chatroom/internal/repositories"
 	"chatroom/internal/servers"
@@ -26,7 +25,6 @@ type DI struct {
 	httpServer   *gin.Engine
 	socketServer *socketio.Server
 	messageQueue domain.MessageQueue
-	customLogger logger.CustomLogger
 }
 
 func New() (*DI, error) {
@@ -43,14 +41,8 @@ func New() (*DI, error) {
 		log.Fatalf("Error initializing message_broker: %s", err.Error())
 	}
 
-	// Initialize logger
-	customLogger, err := logger.New(cfg.Env)
-	if err != nil {
-		log.Fatalf("Error initializing logger: %s", err.Error())
-	}
-
 	// Initialize database
-	database, err := db.New(cfg, &customLogger)
+	database, err := db.New(cfg)
 	if err != nil {
 		log.Fatalf("Error initializing database: %s", err.Error())
 	}
@@ -67,13 +59,12 @@ func New() (*DI, error) {
 		httpServer:   httpServer,
 		socketServer: socketServer,
 		messageQueue: mq,
-		customLogger: customLogger,
 	}, nil
 }
 
 func (d *DI) Inject() {
 	// Inject Middlewares
-	authMiddleware := middlewares.NewAuthenticationMiddleware(d.cfg, d.customLogger)
+	authMiddleware := middlewares.NewAuthenticationMiddleware(d.cfg)
 
 	// ================================================================================================================
 	// Inject Clients
@@ -81,13 +72,13 @@ func (d *DI) Inject() {
 
 	// ================================================================================================================
 	// Inject Repositories
-	chatRepository := repositories.NewChatRepository(d.database, d.customLogger)
-	userRepository := repositories.NewUserRepository(d.database, d.customLogger)
+	chatRepository := repositories.NewChatRepository(d.database)
+	userRepository := repositories.NewUserRepository(d.database)
 
 	// ================================================================================================================
 	// Inject Use Cases
-	sendMessageUseCase := use_cases.NewSendMessageUseCase(chatRepository, userRepository, stockBotClient, d.customLogger)
-	authUseCase := use_cases.NewAuthUseCase(d.cfg.JwtKey, userRepository, d.customLogger)
+	sendMessageUseCase := use_cases.NewSendMessageUseCase(chatRepository, userRepository, stockBotClient)
+	authUseCase := use_cases.NewAuthUseCase(d.cfg.JwtKey, userRepository)
 
 	// ================================================================================================================
 	// Inject Controllers

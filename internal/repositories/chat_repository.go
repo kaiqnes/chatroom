@@ -5,18 +5,15 @@ import (
 
 	"chatroom/internal/db"
 	"chatroom/internal/domain"
-	"chatroom/internal/logger"
 )
 
 type chatRepository struct {
-	db  *db.Database
-	log logger.CustomLogger
+	db *db.Database
 }
 
-func NewChatRepository(db *db.Database, log logger.CustomLogger) domain.ChatRepository {
+func NewChatRepository(db *db.Database) domain.ChatRepository {
 	return &chatRepository{
-		db:  db,
-		log: log,
+		db: db,
 	}
 }
 
