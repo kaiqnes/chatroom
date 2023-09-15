@@ -16,14 +16,13 @@ type Database struct {
 
 func New(cfg *config.Config) (*Database, error) {
 	// Initialize database connection with GORM
-	fmt.Println("[db] Initializing database connection")
 	dsn := getDSN(cfg)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		NowFunc: time.Now().UTC,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect database: %w", err)
+		return nil, fmt.Errorf("[Database.New] failed to connect database: %w", err)
 	}
 
 	return &Database{

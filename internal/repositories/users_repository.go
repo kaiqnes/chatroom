@@ -3,6 +3,7 @@ package repositories
 import (
 	"chatroom/internal/db"
 	"chatroom/internal/domain"
+	"fmt"
 )
 
 type userRepository struct {
@@ -19,7 +20,7 @@ func (r *userRepository) GetUserByUsername(username string) (*domain.User, error
 	var user domain.User
 	tx := r.db.DBInstance.Where("username = ?", username).First(&user)
 	if tx.Error != nil {
-		return nil, tx.Error
+		return nil, fmt.Errorf("[userRepository.GetUserByUsername] error getting user by username. username %s. Err: %w", username, tx.Error)
 	}
 	return &user, nil
 }
@@ -28,7 +29,7 @@ func (r *userRepository) GetUserByID(userID string) (*domain.User, error) {
 	var user domain.User
 	tx := r.db.DBInstance.Where("id = ?", userID).First(&user)
 	if tx.Error != nil {
-		return nil, tx.Error
+		return nil, fmt.Errorf("[userRepository.GetUserByID] error getting user by id. userID %s. Err: %w", userID, tx.Error)
 	}
 	return &user, nil
 }
@@ -36,7 +37,7 @@ func (r *userRepository) GetUserByID(userID string) (*domain.User, error) {
 func (r *userRepository) SaveUser(user *domain.User) error {
 	tx := r.db.DBInstance.Select("username", "password").Create(&user)
 	if tx.Error != nil {
-		return tx.Error
+		return fmt.Errorf("[userRepository.SaveUser] error saving user. Err: %w", tx.Error)
 	}
 	return nil
 }

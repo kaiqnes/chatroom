@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"time"
 
 	"chatroom/internal/db"
@@ -21,7 +22,7 @@ func (r *chatRepository) IsUserInRoom(userID, roomID string) error {
 	var userRoom domain.UserRoom
 	tx := r.db.DBInstance.Where("user_id = ? AND room_id = ? AND left_at IS NULL", userID, roomID).First(&userRoom)
 	if tx.Error != nil {
-		return tx.Error
+		return fmt.Errorf("[chatRepository.IsUserInRoom] failed to get row from userRoom. userID %s and roomID %s. Err: %w", userID, roomID, tx.Error)
 	}
 
 	if userRoom.ID == "" {
@@ -38,7 +39,7 @@ func (r *chatRepository) SendMessage(userID, roomID, content string) error {
 		Body:   content,
 	})
 	if tx.Error != nil {
-		return tx.Error
+		return fmt.Errorf("[chatRepository.SendMessage] failed to create message. userID %s, roomID %s, content %s. Err: %w", userID, roomID, content, tx.Error)
 	}
 	return nil
 }
@@ -47,7 +48,7 @@ func (r *chatRepository) ListActiveRooms() ([]domain.Room, error) {
 	var rooms []domain.Room
 	tx := r.db.DBInstance.Where("deactivated_at IS NULL").Find(&rooms)
 	if tx.Error != nil {
-		return nil, tx.Error
+		return nil, fmt.Errorf("[chatRepository.ListActiveRooms] failed to get rows from rooms. Err: %w", tx.Error)
 	}
 	return rooms, nil
 }
@@ -66,7 +67,7 @@ m.id as message_id, m.body as message_content, m.created_at as message_created_a
 		Limit(50).
 		Scan(&roomDetails)
 	if tx.Error != nil {
-		return nil, tx.Error
+		return nil, fmt.Errorf("[chatRepository.ListRoomDetailsByRoomID] failed to get rows from rooms. Err: %w", tx.Error)
 	}
 
 	var results domain.RoomDetails
@@ -104,7 +105,7 @@ m.id as message_id, m.body as message_content, m.created_at as message_created_a
 func (r *chatRepository) JoinRoom(userID string, roomID string) error {
 	tx := r.db.DBInstance.Create(&domain.UserRoom{UserID: userID, RoomID: roomID})
 	if tx.Error != nil {
-		return tx.Error
+		return fmt.Errorf("[chatRepository.JoinRoom] failed to create userRoom. userID %s, roomID %s. Err: %w", userID, roomID, tx.Error)
 	}
 	return nil
 }
@@ -114,7 +115,7 @@ func (r *chatRepository) LeaveRoom(userID string) error {
 		Where("user_id = ? AND left_at IS NULL", userID).
 		UpdateColumn("left_at", time.Now().UTC())
 	if tx.Error != nil {
-		return tx.Error
+		return fmt.Errorf("[chatRepository.LeaveRoom] failed to update userRoom. userID %s. Err: %w", userID, tx.Error)
 	}
 	return nil
 }

@@ -44,7 +44,7 @@ func Load() (*Config, error) {
 	viper.SetConfigName("config_" + env)
 	viper.AddConfigPath(defaultConfigPath)
 	if err := viper.ReadInConfig(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[Config.Load] Error reading config file, %s", err)
 	}
 
 	for _, k := range viper.AllKeys() {
@@ -56,8 +56,7 @@ func Load() (*Config, error) {
 
 	var cfg Config
 	if err := viper.Unmarshal(&cfg); err != nil {
-		fmt.Println(err)
-		return nil, err
+		return nil, fmt.Errorf("[Config.Load] Error unmarshalling config file, %s", err)
 	}
 
 	cfg.Env = env

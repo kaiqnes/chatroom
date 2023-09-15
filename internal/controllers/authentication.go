@@ -27,7 +27,7 @@ func (c *authController) SignIn(ctx *gin.Context) {
 	var req domain.SignRequestDto
 	err := ctx.BindJSON(&req)
 	if err != nil {
-		fmt.Printf("error binding json: %v\n", err)
+		fmt.Printf("[authController.SignIn] error binding json: %v\n", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"err": err.Error(),
 		})
@@ -36,7 +36,7 @@ func (c *authController) SignIn(ctx *gin.Context) {
 
 	errs := c.validateRequest(req)
 	if len(errs) > 0 {
-		fmt.Printf("missing mandatory fields: %v\n", errs)
+		fmt.Printf("[authController.SignIn] missing mandatory fields: %v\n", errs)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"err": errs,
 		})
@@ -45,7 +45,7 @@ func (c *authController) SignIn(ctx *gin.Context) {
 
 	token, expiration, err := c.useCase.SignIn(ctx, req.Username, req.Password)
 	if err != nil {
-		fmt.Printf("error signing in: %v\n", err)
+		fmt.Printf("[authController.SignIn] error signing in: %v\n", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"err": err.Error(),
 		})
@@ -63,7 +63,7 @@ func (c *authController) SignUp(ctx *gin.Context) {
 	var creds domain.SignRequestDto
 	err := ctx.BindJSON(&creds)
 	if err != nil {
-		fmt.Printf("error binding json: %v\n", err)
+		fmt.Printf("[authController.SignUp] error binding json: %v\n", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"err": err.Error(),
 		})
@@ -72,7 +72,7 @@ func (c *authController) SignUp(ctx *gin.Context) {
 
 	errs := c.validateRequest(creds)
 	if len(errs) > 0 {
-		fmt.Printf("missing mandatory fields: %v\n", errs)
+		fmt.Printf("[authController.SignUp] missing mandatory fields: %v\n", errs)
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"err": errs,
 		})
@@ -81,7 +81,7 @@ func (c *authController) SignUp(ctx *gin.Context) {
 
 	err = c.useCase.SignUp(ctx, creds.Username, creds.Password)
 	if err != nil {
-		fmt.Printf("error signing up: %v\n", err)
+		fmt.Printf("[authController.SignUp] error signing up: %v\n", err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"err": err.Error(),
 		})

@@ -31,7 +31,7 @@ func (m *mq) Send(message []byte) error {
 			Body:        message,
 		})
 	if err != nil {
-		return err
+		return fmt.Errorf("[mq.Send] failed to publish a message: %w", err)
 	}
 	return nil
 }
@@ -47,7 +47,7 @@ func (m *mq) Listen() error {
 		nil,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("[mq.Listen] failed to register a consumer: %w", err)
 	}
 
 	// Create a channel to receive OS signals
@@ -60,14 +60,12 @@ func (m *mq) Listen() error {
 			var botMsg domain.MessageRequestDto
 			err = json.Unmarshal(msg.Body, &botMsg)
 			if err != nil {
-				fmt.Printf("error to unmarshal message: %+v\n", err)
+				fmt.Printf("[mq.Listen] Error unmarshalling message: %s\n", err.Error())
 				continue
 			}
 			m.socket.OnConnect("/", func(s socketio.Conn) error {
-				fmt.Printf("msg to be sent: %+v\n", botMsg)
 				s.SetContext("")
-				b := m.socket.BroadcastToNamespace("/", "chat message", botMsg)
-				fmt.Printf("broadcast: %+v\n", b)
+				m.socket.BroadcastToNamespace("/", "chat message", botMsg)
 				return nil
 			})
 		}
@@ -83,13 +81,13 @@ func NewMQ(cfg *config.Config, socketServer *socketio.Server) (domain.MessageQue
 
 	conn, err := amqp.Dial(host)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[NewMQ] failed to connect to RabbitMQ: %w", err)
 	}
 	//defer conn.Close() // Keep it open
 
 	channel, err := conn.Channel()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[NewMQ] failed to open a channel: %w", err)
 	}
 	//defer channel.Close() // Keep it open
 
@@ -102,7 +100,7 @@ func NewMQ(cfg *config.Config, socketServer *socketio.Server) (domain.MessageQue
 		nil,
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[NewMQ] failed to declare a queue: %w", err)
 	}
 
 	return &mq{

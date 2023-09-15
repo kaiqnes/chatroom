@@ -24,7 +24,7 @@ func (c *stockBot) Call(req domain.StockBotRequest) (*domain.StockBotResponseDto
 
 	resp, err := http.Get(c.ParseURL(req.StockCode))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[stockBot.Call] Error calling stock bot: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -33,7 +33,7 @@ func (c *stockBot) Call(req domain.StockBotRequest) (*domain.StockBotResponseDto
 	for {
 		row, err := reader.Read()
 		if err == io.EOF || err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[stockBot.Call] Error reading response: %w", err)
 		}
 		if isHeader {
 			isHeader = false

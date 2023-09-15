@@ -35,18 +35,18 @@ func (u *sendMessageUseCase) SendMessage(username, roomID, content string) ([]do
 	}
 	user, err := u.userRepository.GetUserByUsername(username)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[sendMessageUseCase.SendMessage] error getting user by username. username %s. Err: %w", username, err)
 	}
 
 	err = u.chatRepository.SendMessage(user.ID, roomID, content)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("[sendMessageUseCase.SendMessage] error saving message. Err: %w", err)
 	}
 
 	if u.isACommand(content) {
 		botMsg, err := u.SendToBotMessage(roomID, content)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("[sendMessageUseCase.SendMessage] error sending message to bot. Err: %w", err)
 		}
 		response = append(response, domain.MessageResponseDto{
 			RoomID:    roomID,
@@ -62,14 +62,14 @@ func (u *sendMessageUseCase) SendMessage(username, roomID, content string) ([]do
 func (u *sendMessageUseCase) SendToBotMessage(roomID, content string) (string, error) {
 	stockCode, err := u.getStockFromMessage(content)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[sendMessageUseCase.SendToBotMessage] error getting stock code from message. Err: %w", err)
 	}
 
 	request := domain.StockBotRequest{StockCode: stockCode}
 
 	response, err := u.botClient.Call(request)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("[sendMessageUseCase.SendToBotMessage] error calling bot. Err: %w", err)
 	}
 
 	// FIX: send to rabbitMQ
@@ -99,7 +99,7 @@ func (u *sendMessageUseCase) getStockFromMessage(content string) (string, error)
 	if len(match) > 0 {
 		return match[1], nil
 	}
-	return "", fmt.Errorf("invalid stock code")
+	return "", fmt.Errorf("[sendMessageUseCase.getStockFromMessage] error getting stock code from message. content %s", content)
 }
 
 func (u *sendMessageUseCase) isACommand(content string) bool {

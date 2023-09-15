@@ -45,7 +45,7 @@ func (c *chatroomController) OnMessage(socket socketio.Conn, req domain.MessageR
 	resp, err := c.sendMessageUseCase.SendMessage(req.Username, req.RoomID, req.Message)
 	if err != nil {
 		// Handle error
-		fmt.Printf("error to persist message: %+v\n", err)
+		fmt.Printf("[chatroomController.OnMessage] error to persist message: %+v\n", err)
 		return
 	}
 

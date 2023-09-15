@@ -26,20 +26,20 @@ func (u *authUseCase) SignIn(ctx context.Context, username, password string) (st
 	// check if user exists
 	user, err := u.userRepository.GetUserByUsername(username)
 	if err != nil {
-		return "", 0, fmt.Errorf("error getting user: %w", err)
+		return "", 0, fmt.Errorf("[authUseCase.SignIn] error getting user: %w", err)
 	}
 
 	// compare password
 	err = u.compareHash(password, user.Password)
 	if err != nil {
-		return "", 0, fmt.Errorf("error comparing hash: %w", err)
+		return "", 0, fmt.Errorf("[authUseCase.SignIn] error comparing hash: %w", err)
 	}
 
 	// generate token
 	expirationTime := time.Now().Add(5 * time.Minute)
 	tokenString, err := u.genToken(user, expirationTime)
 	if err != nil {
-		return "", 0, fmt.Errorf("error signing token: %w", err)
+		return "", 0, fmt.Errorf("[authUseCase.SignIn] error signing token: %w", err)
 	}
 
 	return tokenString, int(expirationTime.Unix()), nil
@@ -49,13 +49,13 @@ func (u *authUseCase) SignUp(ctx context.Context, username, password string) err
 	// check if user exists
 	_, err := u.userRepository.GetUserByUsername(username)
 	if err == nil {
-		return fmt.Errorf("user already exists")
+		return fmt.Errorf("[authUseCase.SignUp] user already exists")
 	}
 
 	// hash password
 	hashedPassword, err := u.hashAndSalt(password)
 	if err != nil {
-		return fmt.Errorf("error hashing password: %w", err)
+		return fmt.Errorf("[authUseCase.SignUp] error hashing password: %w", err)
 	}
 
 	// save user
@@ -65,7 +65,7 @@ func (u *authUseCase) SignUp(ctx context.Context, username, password string) err
 	}
 	err = u.userRepository.SaveUser(user)
 	if err != nil {
-		return fmt.Errorf("error saving user: %w", err)
+		return fmt.Errorf("[authUseCase.SignUp] error saving user: %w", err)
 	}
 
 	return nil
@@ -83,8 +83,7 @@ func (u *authUseCase) genToken(user *domain.User, expirationTime time.Time) (str
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err := token.SignedString(u.jwtSecret)
-	return tokenString, err
+	return token.SignedString(u.jwtSecret)
 }
 
 func (u *authUseCase) compareHash(received, stored string) error {
@@ -94,7 +93,7 @@ func (u *authUseCase) compareHash(received, stored string) error {
 func (u *authUseCase) hashAndSalt(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", fmt.Errorf("error generating hash: %w", err)
+		return "", fmt.Errorf("[authUseCase.hashAndSalt] error generating hash: %w", err)
 	}
 	return string(hash), nil
 }
