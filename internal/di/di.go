@@ -10,12 +10,14 @@ import (
 	"chatroom/internal/logger"
 	"chatroom/internal/middlewares"
 	"chatroom/internal/repositories"
+	"chatroom/internal/servers"
 	"chatroom/internal/use_cases"
-	"github.com/gin-gonic/gin"
-	socketio "github.com/googollee/go-socket.io"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/gin-gonic/gin"
+	socketio "github.com/googollee/go-socket.io"
 )
 
 type DI struct {

@@ -8,6 +8,7 @@ import (
 	"chatroom/internal/config"
 	"chatroom/internal/domain"
 	"chatroom/internal/logger"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )

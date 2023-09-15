@@ -5,9 +5,10 @@ import (
 	"chatroom/internal/logger"
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
-	"time"
 )
 
 type authUseCase struct {

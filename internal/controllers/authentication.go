@@ -1,17 +1,16 @@
 package controllers
 
 import (
-	"chatroom/internal/db"
 	"chatroom/internal/domain"
 	"chatroom/internal/logger"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 type authController struct {
 	routes  *gin.Engine
-	db      *db.Database
 	useCase domain.AuthUseCase
 	log     logger.CustomLogger
 }
@@ -94,7 +93,6 @@ func (c *authController) SignUp(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{
 		"response": "signed up",
 	})
-	return
 }
 
 func (c *authController) validateRequest(creds domain.SignRequestDto) []string {

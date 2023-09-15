@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"chatroom/internal/domain"
+
 	"github.com/gin-gonic/gin"
 	socketio "github.com/googollee/go-socket.io"
 )

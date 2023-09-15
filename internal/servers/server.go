@@ -2,10 +2,11 @@ package servers
 
 import (
 	"chatroom/internal/config"
+	"log"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	socketio "github.com/googollee/go-socket.io"
-	"log"
 )
 
 func New(cfg *config.Config) (*gin.Engine, *socketio.Server, error) {

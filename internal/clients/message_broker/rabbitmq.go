@@ -6,10 +6,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	amqp "github.com/rabbitmq/amqp091-go"
 	"os"
 	"os/signal"
 	"syscall"
+
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 type mq struct {
@@ -64,11 +65,11 @@ func (m *mq) Listen() error {
 				fmt.Printf("error to unmarshal message: %+v\n", err)
 				continue
 			}
-			err = m.controller.SendFromBotMessage(input.RoomID, input.Message)
-			if err != nil {
-				fmt.Printf("error to send message to bot: %+v\n", err)
-				continue
-			}
+			//err = m.controller.SendFromBotMessage(input.RoomID, input.Message)
+			//if err != nil {
+			//	fmt.Printf("error to send message to bot: %+v\n", err)
+			//	continue
+			//}
 		}
 	}()
 
