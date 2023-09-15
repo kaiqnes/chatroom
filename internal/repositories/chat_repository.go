@@ -13,7 +13,7 @@ type chatRepository struct {
 	log logger.CustomLogger
 }
 
-func NewChatRepository(db *db.Database, log *logger.CustomLogger) domain.ChatRepository {
+func NewChatRepository(db *db.Database, log logger.CustomLogger) domain.ChatRepository {
 	return &chatRepository{
 		db:  db,
 		log: log,

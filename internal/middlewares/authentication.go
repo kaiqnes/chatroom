@@ -17,11 +17,7 @@ type authenticationMiddleware struct {
 	cfg *config.Config
 }
 
-type AuthenticationMiddleware interface {
-	ValidateToken() gin.HandlerFunc
-}
-
-func NewAuthenticationMiddleware(cfg *config.Config, log logger.CustomLogger) AuthenticationMiddleware {
+func NewAuthenticationMiddleware(cfg *config.Config, log logger.CustomLogger) domain.AuthenticationMiddleware {
 	return &authenticationMiddleware{cfg: cfg, log: log}
 }
 
@@ -58,8 +54,8 @@ func (m *authenticationMiddleware) ValidateToken() gin.HandlerFunc {
 	}
 }
 
-func (m *authenticationMiddleware) validateToken(ctx *gin.Context) (*domain.Claims, int, error) {
-	var claims domain.Claims
+func (m *authenticationMiddleware) validateToken(ctx *gin.Context) (*domain.ClaimsDto, int, error) {
+	var claims domain.ClaimsDto
 
 	tknStr, status, err := m.hasToken(ctx)
 	if err != nil {

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"chatroom/internal/domain"
-	"chatroom/internal/middlewares"
 	"github.com/gin-gonic/gin"
 	socketio "github.com/googollee/go-socket.io"
 )
@@ -14,12 +13,12 @@ import (
 type chatroomController struct {
 	httpServer         *gin.Engine
 	socketServer       *socketio.Server
-	authMiddleware     middlewares.AuthenticationMiddleware
+	authMiddleware     domain.AuthenticationMiddleware
 	sendMessageUseCase domain.SendMessageUseCase
 }
 
 func NewChatroomController(httpServer *gin.Engine, socketServer *socketio.Server,
-	authMiddleware middlewares.AuthenticationMiddleware, sendMessageUseCase domain.SendMessageUseCase) Controller {
+	authMiddleware domain.AuthenticationMiddleware, sendMessageUseCase domain.SendMessageUseCase) domain.Controller {
 	return &chatroomController{httpServer: httpServer, socketServer: socketServer,
 		authMiddleware: authMiddleware, sendMessageUseCase: sendMessageUseCase}
 }
@@ -28,7 +27,17 @@ func (c *chatroomController) SetupEndpoints() {
 	c.socketServer.OnEvent("/", "chat message", c.OnMessage)
 }
 
-func (c *chatroomController) OnMessage(socket socketio.Conn, req messageInputDto) {
+func (c *chatroomController) SendMessageFromBot(req domain.MessageRequestDto) {
+	resp := domain.MessageResponseDto{
+		RoomID:    req.RoomID,
+		Message:   req.Message,
+		Username:  req.Username,
+		Timestamp: time.Now(),
+	}
+	_ = c.socketServer.BroadcastToNamespace("/", "chat message", resp)
+}
+
+func (c *chatroomController) OnMessage(socket socketio.Conn, req domain.MessageRequestDto) {
 	socket.SetContext(req)
 
 	// Call use case
@@ -39,7 +48,7 @@ func (c *chatroomController) OnMessage(socket socketio.Conn, req messageInputDto
 		return
 	}
 
-	resp := MessageOutputDto{
+	resp := domain.MessageResponseDto{
 		RoomID:    req.RoomID,
 		Message:   req.Message,
 		Username:  req.Username,

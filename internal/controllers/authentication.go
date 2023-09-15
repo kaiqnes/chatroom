@@ -16,7 +16,7 @@ type authController struct {
 	log     logger.CustomLogger
 }
 
-func NewAuthController(routes *gin.Engine, authUseCase domain.AuthUseCase) Controller {
+func NewAuthController(routes *gin.Engine, authUseCase domain.AuthUseCase) domain.Controller {
 	return &authController{routes: routes, useCase: authUseCase}
 }
 
@@ -27,7 +27,7 @@ func (c *authController) SetupEndpoints() {
 }
 
 func (c *authController) SignIn(ctx *gin.Context) {
-	var req signInputDto
+	var req domain.SignRequestDto
 	err := ctx.BindJSON(&req)
 	if err != nil {
 		fmt.Printf("error binding json: %v\n", err)
@@ -63,7 +63,7 @@ func (c *authController) SignIn(ctx *gin.Context) {
 }
 
 func (c *authController) SignUp(ctx *gin.Context) {
-	var creds signInputDto
+	var creds domain.SignRequestDto
 	err := ctx.BindJSON(&creds)
 	if err != nil {
 		fmt.Printf("error binding json: %v\n", err)
@@ -97,7 +97,7 @@ func (c *authController) SignUp(ctx *gin.Context) {
 	return
 }
 
-func (c *authController) validateRequest(creds signInputDto) []string {
+func (c *authController) validateRequest(creds domain.SignRequestDto) []string {
 	var errs []string
 	if len(creds.Username) == 0 {
 		errs = append(errs, "empty username")

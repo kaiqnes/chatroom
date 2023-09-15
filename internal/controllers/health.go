@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"chatroom/internal/domain"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,7 +11,7 @@ type healthCheckController struct {
 	routes *gin.Engine
 }
 
-func NewHealthCheckController(routes *gin.Engine) Controller {
+func NewHealthCheckController(routes *gin.Engine) domain.Controller {
 	return &healthCheckController{routes: routes}
 }
 

@@ -1,6 +1,9 @@
 package domain
 
-import "context"
+import (
+	"context"
+	"github.com/gin-gonic/gin"
+)
 
 type ChatRepository interface {
 	ListActiveRooms() ([]Room, error)
@@ -29,5 +32,18 @@ type AuthUseCase interface {
 }
 
 type StockBotClient interface {
-	Call(req StockBotRequest) (*StockBotResponse, error)
+	Call(req StockBotRequest) (*StockBotResponseDto, error)
+}
+
+type MessageQueue interface {
+	Send(message []byte) error
+	Listen() error
+}
+
+type Controller interface {
+	SetupEndpoints()
+}
+
+type AuthenticationMiddleware interface {
+	ValidateToken() gin.HandlerFunc
 }

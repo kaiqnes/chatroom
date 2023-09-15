@@ -25,6 +25,12 @@ type Config struct {
 	DBMaxConnectionLifetime time.Duration `mapstructure:"db_max_life_time"`
 	DBMaxIdleTime           time.Duration `mapstructure:"db_max_idle_time"`
 	StockBotTemplateURL     string        `mapstructure:"stock_bot_template_url"`
+	RabbitMQHost            string        `mapstructure:"rabbitmq_host"`
+	RabbitMQHostTemplate    string        `mapstructure:"rabbitmq_host_template"`
+	RabbitMQPort            string        `mapstructure:"rabbitmq_port"`
+	RabbitMQUser            string        `mapstructure:"rabbitmq_user"`
+	RabbitMQPassword        string        `mapstructure:"rabbitmq_password"`
+	RabbitMQQueue           string        `mapstructure:"rabbitmq_queue"`
 }
 
 const defaultConfigPath = "./internal/config/"
@@ -52,7 +58,6 @@ func Load() (*Config, error) {
 		fmt.Println(err)
 		return nil, err
 	}
-	fmt.Println(cfg)
 
 	cfg.Env = env
 

@@ -10,19 +10,13 @@ import (
 	"time"
 )
 
-type Claims struct {
-	Username string `json:"username"`
-	UserID   string `json:"user_id"`
-	jwt.RegisteredClaims
-}
-
 type authUseCase struct {
 	jwtSecret      []byte
 	userRepository domain.UserRepository
-	log            *logger.CustomLogger
+	log            logger.CustomLogger
 }
 
-func NewAuthUseCase(secret string, userRepository domain.UserRepository, log *logger.CustomLogger) domain.AuthUseCase {
+func NewAuthUseCase(secret string, userRepository domain.UserRepository, log logger.CustomLogger) domain.AuthUseCase {
 	return &authUseCase{
 		jwtSecret:      []byte(secret),
 		userRepository: userRepository,
@@ -80,7 +74,7 @@ func (u *authUseCase) SignUp(ctx context.Context, username, password string) err
 }
 
 func (u *authUseCase) genToken(user *domain.User, expirationTime time.Time) (string, error) {
-	claims := &Claims{
+	claims := &domain.Claims{
 		Username: user.Username,
 		UserID:   user.ID,
 		RegisteredClaims: jwt.RegisteredClaims{

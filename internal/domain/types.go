@@ -10,7 +10,9 @@ import (
 
 const StockRequestTemplate = `^\\/stock=(.)$`
 
-type Claims struct {
+var CommandList = []string{StockRequestTemplate}
+
+type ClaimsDto struct {
 	Username string `json:"username"`
 	UserID   string `json:"user_id"`
 	jwt.RegisteredClaims
@@ -88,7 +90,7 @@ type StockBotRequest struct {
 	StockCode string
 }
 
-type StockBotResponse struct {
+type StockBotResponseDto struct {
 	Symbol string `csv:"Symbol"`
 	Date   string `csv:"Date"`
 	Time   string `csv:"Time"`
@@ -99,6 +101,34 @@ type StockBotResponse struct {
 	Volume string `csv:"Volume"`
 }
 
-func (s *StockBotResponse) GetFormattedResponse() string {
+func (s *StockBotResponseDto) GetFormattedResponse() string {
 	return fmt.Sprintf("%s quote is $%s per share", s.Symbol, s.Close)
+}
+
+type SignRequestDto struct {
+	Password string `json:"password"`
+	Username string `json:"username"`
+}
+
+type MessageRequestDto struct {
+	Username string `json:"username"`
+	RoomID   string `json:"room_id"`
+	Message  string `json:"message"`
+}
+
+type MessagesResponseDto struct {
+	Messages []MessageResponseDto `json:"messages"`
+}
+
+type MessageResponseDto struct {
+	RoomID    string    `json:"room_id"`
+	Message   string    `json:"message"`
+	Username  string    `json:"username"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+type Claims struct {
+	Username string `json:"username"`
+	UserID   string `json:"user_id"`
+	jwt.RegisteredClaims
 }

@@ -1,16 +1,19 @@
 package di
 
 import (
-	"chatroom/internal/clients"
+	"chatroom/internal/clients/message_broker"
+	"chatroom/internal/clients/rest"
 	"chatroom/internal/config"
 	"chatroom/internal/controllers"
 	"chatroom/internal/db"
+	"chatroom/internal/domain"
 	"chatroom/internal/logger"
 	"chatroom/internal/middlewares"
 	"chatroom/internal/repositories"
 	"chatroom/internal/use_cases"
 	"github.com/gin-gonic/gin"
 	socketio "github.com/googollee/go-socket.io"
+	"log"
 	"net/http"
 	"os"
 )
@@ -20,37 +23,69 @@ type DI struct {
 	database     *db.Database
 	httpServer   *gin.Engine
 	socketServer *socketio.Server
-	log          *logger.CustomLogger
+	messageQueue domain.MessageQueue
+	customLogger logger.CustomLogger
 }
 
-func New(cfg *config.Config, database *db.Database, httpServer *gin.Engine, server *socketio.Server, log *logger.CustomLogger) (*DI, error) {
+func New() (*DI, error) {
 	// Initialize dependencies
+	// Read config file
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("Error loading config: %s", err.Error())
+	}
+
+	// Initialize message broker
+	mq, err := message_broker.NewMQ(cfg)
+	if err != nil {
+		log.Fatalf("Error initializing message_broker: %s", err.Error())
+	}
+
+	// Initialize logger
+	customLogger, err := logger.New(cfg.Env)
+	if err != nil {
+		log.Fatalf("Error initializing logger: %s", err.Error())
+	}
+
+	// Initialize database
+	database, err := db.New(cfg, &customLogger)
+	if err != nil {
+		log.Fatalf("Error initializing database: %s", err.Error())
+	}
+
+	// Initialize server
+	httpServer, socketServer, err := servers.New(cfg)
+	if err != nil {
+		log.Fatalf("Error initializing server: %s", err.Error())
+	}
+
 	return &DI{
 		cfg:          cfg,
 		database:     database,
 		httpServer:   httpServer,
-		socketServer: server,
-		log:          log,
+		socketServer: socketServer,
+		messageQueue: mq,
+		customLogger: customLogger,
 	}, nil
 }
 
 func (d *DI) Inject() {
 	// Inject Middlewares
-	authMiddleware := middlewares.NewAuthenticationMiddleware(d.cfg, d.log)
+	authMiddleware := middlewares.NewAuthenticationMiddleware(d.cfg, d.customLogger)
 
 	// ================================================================================================================
 	// Inject Clients
-	stockBotClient := clients.NewStockBot(d.cfg)
+	stockBotClient := rest.NewStockBot(d.cfg)
 
 	// ================================================================================================================
 	// Inject Repositories
-	chatRepository := repositories.NewChatRepository(d.database, d.log)
-	userRepository := repositories.NewUserRepository(d.database, d.log)
+	chatRepository := repositories.NewChatRepository(d.database, d.customLogger)
+	userRepository := repositories.NewUserRepository(d.database, d.customLogger)
 
 	// ================================================================================================================
 	// Inject Use Cases
-	sendMessageUseCase := use_cases.NewSendMessageUseCase(chatRepository, userRepository, stockBotClient, d.log)
-	authUseCase := use_cases.NewAuthUseCase(d.cfg.JwtKey, userRepository, d.log)
+	sendMessageUseCase := use_cases.NewSendMessageUseCase(chatRepository, userRepository, stockBotClient, d.customLogger)
+	authUseCase := use_cases.NewAuthUseCase(d.cfg.JwtKey, userRepository, d.customLogger)
 
 	// ================================================================================================================
 	// Inject Controllers
@@ -88,4 +123,28 @@ func (d *DI) Inject() {
 			"title": "Main website",
 		})
 	})
+}
+
+func (d *DI) RunServers() {
+	// Start message broker
+	go func() {
+		err := d.messageQueue.Listen()
+		if err != nil {
+			log.Fatalf("Error listening on message_broker: %s", err.Error())
+		}
+	}()
+
+	// Start Socket Server
+	go func() {
+		if err := d.socketServer.Serve(); err != nil {
+			log.Fatalf("socketio listen error: %s\n", err)
+		}
+		defer d.socketServer.Close()
+	}()
+
+	// Start HTTP Server
+	err := d.httpServer.Run(":" + d.cfg.Port)
+	if err != nil {
+		log.Fatalf("Error running server: %s", err.Error())
+	}
 }

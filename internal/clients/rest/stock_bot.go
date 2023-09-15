@@ -1,4 +1,4 @@
-package clients
+package rest
 
 import (
 	"chatroom/internal/config"
@@ -19,8 +19,8 @@ func NewStockBot(cfg *config.Config) domain.StockBotClient {
 	}
 }
 
-func (c *stockBot) Call(req domain.StockBotRequest) (*domain.StockBotResponse, error) {
-	var response *domain.StockBotResponse
+func (c *stockBot) Call(req domain.StockBotRequest) (*domain.StockBotResponseDto, error) {
+	var response *domain.StockBotResponseDto
 
 	resp, err := http.Get(c.ParseURL(req.StockCode))
 	if err != nil {
@@ -39,7 +39,7 @@ func (c *stockBot) Call(req domain.StockBotRequest) (*domain.StockBotResponse, e
 			isHeader = false
 			continue
 		}
-		response = &domain.StockBotResponse{
+		response = &domain.StockBotResponseDto{
 			Symbol: row[0],
 			Date:   row[1],
 			Time:   row[2],

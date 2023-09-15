@@ -11,7 +11,7 @@ type userRepository struct {
 	log logger.CustomLogger
 }
 
-func NewUserRepository(db *db.Database, log *logger.CustomLogger) domain.UserRepository {
+func NewUserRepository(db *db.Database, log logger.CustomLogger) domain.UserRepository {
 	return &userRepository{
 		db:  db,
 		log: log,
