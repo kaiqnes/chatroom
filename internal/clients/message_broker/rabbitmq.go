@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	socketio "github.com/googollee/go-socket.io"
 	"os"
 	"os/signal"
 	"syscall"
@@ -14,10 +15,9 @@ import (
 )
 
 type mq struct {
-	channel    *amqp.Channel
-	queue      amqp.Queue
-	useCase    domain.SendMessageUseCase //TODO: add to constructor
-	controller domain.Controller         //TODO: add to constructor
+	channel *amqp.Channel
+	queue   amqp.Queue
+	socket  *socketio.Server
 }
 
 func (m *mq) Send(message []byte) error {
@@ -33,8 +33,6 @@ func (m *mq) Send(message []byte) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Println("Successfully Published Messages to Queue")
 	return nil
 }
 
@@ -59,17 +57,19 @@ func (m *mq) Listen() error {
 	go func() {
 		for msg := range msgs {
 			fmt.Printf("Received message: %s\n", msg.Body)
-			var input domain.MessageRequestDto
-			err = json.Unmarshal(msg.Body, &input)
+			var botMsg domain.MessageRequestDto
+			err = json.Unmarshal(msg.Body, &botMsg)
 			if err != nil {
 				fmt.Printf("error to unmarshal message: %+v\n", err)
 				continue
 			}
-			//err = m.controller.SendFromBotMessage(input.RoomID, input.Message)
-			//if err != nil {
-			//	fmt.Printf("error to send message to bot: %+v\n", err)
-			//	continue
-			//}
+			m.socket.OnConnect("/", func(s socketio.Conn) error {
+				fmt.Printf("msg to be sent: %+v\n", botMsg)
+				s.SetContext("")
+				b := m.socket.BroadcastToNamespace("/", "chat message", botMsg)
+				fmt.Printf("broadcast: %+v\n", b)
+				return nil
+			})
 		}
 	}()
 
@@ -78,7 +78,7 @@ func (m *mq) Listen() error {
 	return nil
 }
 
-func NewMQ(cfg *config.Config) (domain.MessageQueue, error) {
+func NewMQ(cfg *config.Config, socketServer *socketio.Server) (domain.MessageQueue, error) {
 	host := fmt.Sprintf(cfg.RabbitMQHostTemplate, cfg.RabbitMQUser, cfg.RabbitMQPassword, cfg.RabbitMQHost, cfg.RabbitMQPort)
 
 	conn, err := amqp.Dial(host)
@@ -108,5 +108,6 @@ func NewMQ(cfg *config.Config) (domain.MessageQueue, error) {
 	return &mq{
 		channel: channel,
 		queue:   queue,
+		socket:  socketServer,
 	}, nil
 }

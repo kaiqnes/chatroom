@@ -35,12 +35,6 @@ func New() (*DI, error) {
 		log.Fatalf("Error loading config: %s", err.Error())
 	}
 
-	// Initialize message broker
-	mq, err := message_broker.NewMQ(cfg)
-	if err != nil {
-		log.Fatalf("Error initializing message_broker: %s", err.Error())
-	}
-
 	// Initialize database
 	database, err := db.New(cfg)
 	if err != nil {
@@ -51,6 +45,12 @@ func New() (*DI, error) {
 	httpServer, socketServer, err := servers.New()
 	if err != nil {
 		log.Fatalf("Error initializing server: %s", err.Error())
+	}
+
+	// Initialize message broker
+	mq, err := message_broker.NewMQ(cfg, socketServer)
+	if err != nil {
+		log.Fatalf("Error initializing message_broker: %s", err.Error())
 	}
 
 	return &DI{
@@ -77,7 +77,7 @@ func (d *DI) Inject() {
 
 	// ================================================================================================================
 	// Inject Use Cases
-	sendMessageUseCase := use_cases.NewSendMessageUseCase(chatRepository, userRepository, stockBotClient)
+	sendMessageUseCase := use_cases.NewSendMessageUseCase(chatRepository, userRepository, stockBotClient, d.messageQueue)
 	authUseCase := use_cases.NewAuthUseCase(d.cfg.JwtKey, userRepository)
 
 	// ================================================================================================================

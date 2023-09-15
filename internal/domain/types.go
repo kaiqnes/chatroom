@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-const StockRequestTemplate = `^\\/stock=(.)$`
+const StockRequestTemplate = `\/stock=(.+)$`
 
 var CommandList = []string{StockRequestTemplate}
 

@@ -18,7 +18,6 @@ func New() (*gin.Engine, *socketio.Server, error) {
 
 func setupSocketServer() *socketio.Server {
 	socketServer := socketio.NewServer(nil)
-
 	socketServer.OnConnect("/", func(s socketio.Conn) error {
 		s.SetContext("")
 		return nil

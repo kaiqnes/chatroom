@@ -2,9 +2,9 @@ package use_cases
 
 import (
 	"chatroom/internal/domain"
-	"encoding/json"
 	"fmt"
 	"regexp"
+	"time"
 )
 
 type sendMessageUseCase struct {
@@ -15,70 +15,81 @@ type sendMessageUseCase struct {
 }
 
 func NewSendMessageUseCase(chatRepository domain.ChatRepository, userRepository domain.UserRepository,
-	botClient domain.StockBotClient) domain.SendMessageUseCase {
+	botClient domain.StockBotClient, mq domain.MessageQueue) domain.SendMessageUseCase {
 	return &sendMessageUseCase{
 		chatRepository: chatRepository,
 		userRepository: userRepository,
 		botClient:      botClient,
+		mq:             mq,
 	}
 }
 
-func (u *sendMessageUseCase) SendMessage(username, roomID, content string) error {
+func (u *sendMessageUseCase) SendMessage(username, roomID, content string) ([]domain.MessageResponseDto, error) {
+	response := []domain.MessageResponseDto{
+		{
+			RoomID:    roomID,
+			Message:   content,
+			Username:  username,
+			Timestamp: time.Now(),
+		},
+	}
 	user, err := u.userRepository.GetUserByUsername(username)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = u.chatRepository.SendMessage(user.ID, roomID, content)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if u.isACommand(content) {
-		err = u.SendToBotMessage(roomID, content)
+		botMsg, err := u.SendToBotMessage(roomID, content)
 		if err != nil {
-			return err
+			return nil, err
 		}
+		response = append(response, domain.MessageResponseDto{
+			RoomID:    roomID,
+			Message:   botMsg,
+			Username:  "StockBot",
+			Timestamp: time.Now(),
+		})
 	}
 
-	return nil
+	return response, nil
 }
 
-func (u *sendMessageUseCase) SendToBotMessage(roomID, content string) error {
+func (u *sendMessageUseCase) SendToBotMessage(roomID, content string) (string, error) {
 	stockCode, err := u.getStockFromMessage(content)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	request := domain.StockBotRequest{StockCode: stockCode}
 
 	response, err := u.botClient.Call(request)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	botRequest := domain.MessageRequestDto{
-		Username: "stockBot",
-		RoomID:   roomID,
-		Message:  response.GetFormattedResponse(),
-	}
+	// FIX: send to rabbitMQ
+	//botRequest := domain.MessageRequestDto{
+	//	Username: "stockBot",
+	//	RoomID:   roomID,
+	//	Message:  response.GetFormattedResponse(),
+	//}
+	//
+	//botRequestBytes, err := json.Marshal(botRequest)
+	//if err != nil {
+	//	return "", err
+	//}
+	//
+	//err = u.mq.Send(botRequestBytes)
+	//if err != nil {
+	//	return err
+	//}
 
-	botRequestBytes, err := json.Marshal(botRequest)
-	if err != nil {
-		return err
-	}
-
-	err = u.mq.Send(botRequestBytes)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (u *sendMessageUseCase) SendFromBotMessage(roomID, content string) error {
-
-	return nil
+	return response.GetFormattedResponse(), nil
 }
 
 func (u *sendMessageUseCase) getStockFromMessage(content string) (string, error) {

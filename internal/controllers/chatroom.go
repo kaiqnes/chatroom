@@ -42,21 +42,17 @@ func (c *chatroomController) OnMessage(socket socketio.Conn, req domain.MessageR
 	socket.SetContext(req)
 
 	// Call use case
-	err := c.sendMessageUseCase.SendMessage(req.Username, req.RoomID, req.Message)
+	resp, err := c.sendMessageUseCase.SendMessage(req.Username, req.RoomID, req.Message)
 	if err != nil {
 		// Handle error
 		fmt.Printf("error to persist message: %+v\n", err)
 		return
 	}
 
-	resp := domain.MessageResponseDto{
-		RoomID:    req.RoomID,
-		Message:   req.Message,
-		Username:  req.Username,
-		Timestamp: time.Now(),
+	// Broadcast to all clients
+	for _, r := range resp {
+		_ = c.socketServer.BroadcastToNamespace("/", "chat message", r)
 	}
-
-	_ = c.socketServer.BroadcastToNamespace("/", "chat message", resp)
 }
 
 func (c *chatroomController) ListMessages(ctx *gin.Context) {

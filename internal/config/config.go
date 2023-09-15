@@ -30,7 +30,7 @@ type Config struct {
 	RabbitMQHostTemplate    string        `mapstructure:"rabbitmq_host_template"`
 	RabbitMQPort            string        `mapstructure:"rabbitmq_port"`
 	RabbitMQUser            string        `mapstructure:"rabbitmq_user"`
-	RabbitMQPassword        string        `mapstructure:"rabbitmq_password"`
+	RabbitMQPassword        string        `mapstructure:"rabbitmq_pass"`
 	RabbitMQQueue           string        `mapstructure:"rabbitmq_queue"`
 }
 

@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+
 	socketio "github.com/googollee/go-socket.io"
 
 	"github.com/gin-gonic/gin"
@@ -23,9 +24,8 @@ type UserRepository interface {
 }
 
 type SendMessageUseCase interface {
-	SendMessage(username, roomID, content string) error
-	SendToBotMessage(roomID, content string) error
-	SendFromBotMessage(roomID, content string) error
+	SendMessage(username, roomID, content string) ([]MessageResponseDto, error)
+	SendToBotMessage(roomID, content string) (string, error)
 }
 
 type AuthUseCase interface {
