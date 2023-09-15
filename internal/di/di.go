@@ -56,7 +56,7 @@ func New() (*DI, error) {
 	}
 
 	// Initialize server
-	httpServer, socketServer, err := servers.New(cfg)
+	httpServer, socketServer, err := servers.New()
 	if err != nil {
 		log.Fatalf("Error initializing server: %s", err.Error())
 	}

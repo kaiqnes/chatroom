@@ -1,7 +1,6 @@
 package servers
 
 import (
-	"chatroom/internal/config"
 	"log"
 
 	"github.com/gin-contrib/cors"
@@ -9,7 +8,7 @@ import (
 	socketio "github.com/googollee/go-socket.io"
 )
 
-func New(cfg *config.Config) (*gin.Engine, *socketio.Server, error) {
+func New() (*gin.Engine, *socketio.Server, error) {
 	// Initialize servers
 	httpServer := setupHTTPServer()
 	socketServer := setupSocketServer()
