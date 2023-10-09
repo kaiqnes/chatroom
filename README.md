@@ -1,4 +1,4 @@
-# Jobsity - Chat
+# Chat
 
 This project contains a online chat room that allow registered users to send text messages between each other and also to use a StockBot to obtain the current stock amount from [stooq.com](https://stooq.com).
 
